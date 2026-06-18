@@ -1,10 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { UserButton } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "@/lib/use-auth";
+
+const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+
+function ClerkUserButton() {
+  if (!clerkKey) return null;
+  const { UserButton } = require("@clerk/nextjs");
+  return <UserButton />;
+}
 
 export function Navbar() {
   const { userId } = useAuth();
@@ -41,7 +48,7 @@ export function Navbar() {
               Profile
             </Link>
           )}
-          <UserButton />
+          <ClerkUserButton />
         </div>
       </div>
     </nav>

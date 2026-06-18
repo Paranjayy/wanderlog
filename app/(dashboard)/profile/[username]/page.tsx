@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "@/lib/use-auth";
 import { MapContainer } from "@/components/map/MapContainer";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { FollowButton } from "@/components/social/FollowButton";

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "@/lib/use-auth";
 import { MapContainer } from "@/components/map/MapContainer";
 import { AddPinModal } from "@/components/map/AddPinModal";
 import { PlaceCard } from "@/components/ui/PlaceCard";
