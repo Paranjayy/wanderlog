@@ -3,12 +3,19 @@
 import { useParams } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
+import { useAuth } from "@clerk/nextjs";
 import { MapContainer } from "@/components/map/MapContainer";
 import { UserAvatar } from "@/components/ui/UserAvatar";
+import { FollowButton } from "@/components/social/FollowButton";
 
 export default function ProfilePage() {
   const params = useParams<{ username: string }>();
   const username = params.username;
+  const { userId } = useAuth();
+  const currentUser = useQuery(
+    api.users.getCurrentUser,
+    userId ? { clerkId: userId } : "skip"
+  );
 
   const user = useQuery(api.users.getByUsername, {
     username,
@@ -69,6 +76,12 @@ export default function ProfilePage() {
             <p className="text-sm text-gray-500">Following</p>
           </div>
         </div>
+
+        {currentUser && currentUser._id !== user._id && (
+          <div className="mt-4">
+            <FollowButton currentUserId={currentUser._id} targetUserId={user._id} />
+          </div>
+        )}
       </div>
 
       {/* User's map */}

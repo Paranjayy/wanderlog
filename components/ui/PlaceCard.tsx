@@ -1,9 +1,14 @@
 "use client";
 
-import { useQuery } from "convex/react";
+import { useState } from "react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
+import { useAuth } from "@clerk/nextjs";
 import { UserAvatar } from "./UserAvatar";
+import { PhotoGallery } from "./PhotoGallery";
+import { LikeButton } from "../social/LikeButton";
+import { Comments } from "../social/Comments";
 
 interface PlaceCardProps {
   placeId: Id<"places">;
@@ -12,6 +17,39 @@ interface PlaceCardProps {
 
 export function PlaceCard({ placeId, onClose }: PlaceCardProps) {
   const place = useQuery(api.places.getById, { placeId });
+  const stories = useQuery(api.stories.getByPlace, { placeId });
+  const { userId } = useAuth();
+  const currentUser = useQuery(
+    api.users.getCurrentUser,
+    userId ? { clerkId: userId } : "skip"
+  );
+  const createStory = useMutation(api.stories.create);
+  const deletePlace = useMutation(api.places.deletePlace);
+
+  const [showStoryForm, setShowStoryForm] = useState(false);
+  const [storyTitle, setStoryTitle] = useState("");
+  const [storyContent, setStoryContent] = useState("");
+  const [isSubmittingStory, setIsSubmittingStory] = useState(false);
+
+  const handleCreateStory = async () => {
+    if (!currentUser || !storyTitle.trim() || !storyContent.trim()) return;
+    setIsSubmittingStory(true);
+    try {
+      await createStory({
+        userId: currentUser._id,
+        placeId,
+        title: storyTitle.trim(),
+        content: storyContent.trim(),
+      });
+      setStoryTitle("");
+      setStoryContent("");
+      setShowStoryForm(false);
+    } catch (error) {
+      console.error("Failed to create story:", error);
+    } finally {
+      setIsSubmittingStory(false);
+    }
+  };
 
   if (!place) {
     return (
@@ -33,8 +71,30 @@ export function PlaceCard({ placeId, onClose }: PlaceCardProps) {
     <div className="h-full w-96 overflow-y-auto border-l bg-white shadow-xl">
       <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-white p-4">
         <h2 className="text-lg font-bold">{place.name}</h2>
-        <button onClick={onClose} className="rounded-full p-1 hover:bg-gray-100">✕</button>
+        <div className="flex items-center gap-1">
+          {currentUser && place.userId === currentUser._id && (
+            <button
+              onClick={async () => {
+                if (confirm("Delete this place?")) {
+                  await deletePlace({ placeId: place._id });
+                  onClose();
+                }
+              }}
+              className="rounded-full p-1 text-red-500 hover:bg-red-50"
+            >
+              🗑
+            </button>
+          )}
+          <button onClick={onClose} className="rounded-full p-1 hover:bg-gray-100">✕</button>
+        </div>
       </div>
+
+      {/* Photo Gallery */}
+      {currentUser && (
+        <div className="border-b p-4">
+          <PhotoGallery placeId={placeId} userId={currentUser._id} />
+        </div>
+      )}
 
       <div className="p-4">
         <span className={`inline-block rounded-full px-3 py-1 text-xs font-medium ${typeColors[place.type]}`}>
@@ -80,9 +140,82 @@ export function PlaceCard({ placeId, onClose }: PlaceCardProps) {
           </div>
         )}
 
+        {currentUser && (
+          <div className="mt-4">
+            <LikeButton userId={currentUser._id} targetType="place" targetId={place._id} />
+          </div>
+        )}
+
         <p className="mt-4 text-xs text-gray-400">
           {place.coordinates.lat.toFixed(4)}, {place.coordinates.lng.toFixed(4)}
         </p>
+      </div>
+
+      {/* Stories Section */}
+      <div className="border-t p-4">
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-gray-700">Stories</h3>
+          {currentUser && (
+            <button
+              onClick={() => setShowStoryForm(!showStoryForm)}
+              className="rounded-lg bg-emerald-600 px-3 py-1 text-xs text-white hover:bg-emerald-700"
+            >
+              {showStoryForm ? "Cancel" : "Write Story"}
+            </button>
+          )}
+        </div>
+
+        {showStoryForm && (
+          <div className="mb-4 space-y-3 rounded-lg border bg-gray-50 p-3">
+            <input
+              type="text"
+              value={storyTitle}
+              onChange={(e) => setStoryTitle(e.target.value)}
+              placeholder="Story title"
+              className="w-full rounded-lg border px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+            />
+            <textarea
+              value={storyContent}
+              onChange={(e) => setStoryContent(e.target.value)}
+              placeholder="Share your experience..."
+              rows={4}
+              className="w-full rounded-lg border px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+            />
+            <button
+              onClick={handleCreateStory}
+              disabled={isSubmittingStory || !storyTitle.trim() || !storyContent.trim()}
+              className="w-full rounded-lg bg-emerald-600 px-3 py-1.5 text-sm text-white hover:bg-emerald-700 disabled:opacity-50"
+            >
+              {isSubmittingStory ? "Posting..." : "Post Story"}
+            </button>
+          </div>
+        )}
+
+        {!stories || stories.length === 0 ? (
+          <p className="text-xs text-gray-500">No stories yet.</p>
+        ) : (
+          <div className="space-y-3">
+            {stories.map((story) => (
+              <div key={story._id} className="rounded-lg border bg-gray-50 p-3">
+                <h4 className="text-sm font-medium">{story.title}</h4>
+                <p className="mt-1 text-xs text-gray-600 line-clamp-2">
+                  {story.content.slice(0, 100)}
+                  {story.content.length > 100 ? "..." : ""}
+                </p>
+                <div className="mt-2 flex items-center gap-2 text-xs text-gray-400">
+                  {story.user && <span>{story.user.displayName}</span>}
+                  <span>·</span>
+                  <span>{new Date(story.createdAt).toLocaleDateString()}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Comments Section */}
+      <div className="border-t p-4">
+        <Comments targetType="place" targetId={place._id} />
       </div>
     </div>
   );
