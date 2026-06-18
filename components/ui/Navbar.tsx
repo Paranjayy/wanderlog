@@ -24,6 +24,12 @@ export function Navbar() {
           <Link href="/map" className="text-gray-600 hover:text-gray-900">
             Map
           </Link>
+          <Link href="/trips" className="text-gray-600 hover:text-gray-900">
+            Trips
+          </Link>
+          <Link href="/stats" className="text-gray-600 hover:text-gray-900">
+            Stats
+          </Link>
           <Link href="/discover" className="text-gray-600 hover:text-gray-900">
             Discover
           </Link>
