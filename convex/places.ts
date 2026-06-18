@@ -109,3 +109,20 @@ export const remove = mutation({
     await ctx.db.delete(args.placeId);
   },
 });
+
+export const deletePlace = mutation({
+  args: { placeId: v.id("places") },
+  handler: async (ctx, args) => {
+    const place = await ctx.db.get(args.placeId);
+    if (!place) return;
+    
+    await ctx.db.delete(args.placeId);
+    
+    const user = await ctx.db.get(place.userId);
+    if (user && user.travelCount > 0) {
+      await ctx.db.patch(place.userId, {
+        travelCount: user.travelCount - 1,
+      });
+    }
+  },
+});

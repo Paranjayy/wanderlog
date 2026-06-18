@@ -8,7 +8,13 @@
  * @module
  */
 
+import type * as comments from "../comments.js";
+import type * as follows from "../follows.js";
+import type * as likes from "../likes.js";
+import type * as photos from "../photos.js";
 import type * as places from "../places.js";
+import type * as stories from "../stories.js";
+import type * as trips from "../trips.js";
 import type * as users from "../users.js";
 
 import type {
@@ -18,7 +24,13 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  comments: typeof comments;
+  follows: typeof follows;
+  likes: typeof likes;
+  photos: typeof photos;
   places: typeof places;
+  stories: typeof stories;
+  trips: typeof trips;
   users: typeof users;
 }>;
 
