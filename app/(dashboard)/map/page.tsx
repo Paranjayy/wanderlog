@@ -6,6 +6,8 @@ import { api } from "../../../convex/_generated/api";
 import { useAuth } from "@clerk/nextjs";
 import { MapContainer } from "@/components/map/MapContainer";
 import { AddPinModal } from "@/components/map/AddPinModal";
+import { PlaceCard } from "@/components/ui/PlaceCard";
+import { Id } from "../../../convex/_generated/dataModel";
 
 export default function MapPage() {
   const { userId } = useAuth();
@@ -15,7 +17,7 @@ export default function MapPage() {
   );
   const allPlaces = useQuery(api.places.getAllPublic);
 
-  const [selectedPin, setSelectedPin] = useState<string | null>(null);
+  const [selectedPinId, setSelectedPinId] = useState<Id<"places"> | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newPinCoords, setNewPinCoords] = useState<{ lng: number; lat: number } | null>(null);
 
@@ -29,15 +31,21 @@ export default function MapPage() {
     })) ?? [];
 
   return (
-    <div className="relative h-full">
-      <MapContainer
-        pins={pins}
-        onPinClick={(id) => setSelectedPin(id)}
-        onMapClick={(lng, lat) => {
-          setNewPinCoords({ lng, lat });
-          setShowAddModal(true);
-        }}
-      />
+    <div className="relative flex h-full">
+      <div className="flex-1">
+        <MapContainer
+          pins={pins}
+          onPinClick={(id) => setSelectedPinId(id as Id<"places">)}
+          onMapClick={(lng, lat) => {
+            setNewPinCoords({ lng, lat });
+            setShowAddModal(true);
+          }}
+        />
+      </div>
+
+      {selectedPinId && (
+        <PlaceCard placeId={selectedPinId} onClose={() => setSelectedPinId(null)} />
+      )}
 
       {currentUser && (
         <AddPinModal
