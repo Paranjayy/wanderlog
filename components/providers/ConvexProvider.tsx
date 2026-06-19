@@ -3,9 +3,11 @@
 import { ReactNode, Suspense } from "react";
 import { ConvexReactClient, ConvexProvider } from "convex/react";
 
-const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
+const rawConvexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
 const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
+// Skip Convex if URL is localhost (won't work on Vercel)
+const convexUrl = rawConvexUrl && !rawConvexUrl.includes("localhost") ? rawConvexUrl : null;
 const convex = convexUrl ? new ConvexReactClient(convexUrl) : null;
 
 function InnerProviders({ children }: { children: ReactNode }) {
