@@ -1,7 +1,24 @@
 export const MAP_STYLES = {
-  streets: "https://demotiles.maplibre.org/style.json",
-  satellite: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
-  dark: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+  voyager: {
+    label: "Colorful",
+    url: "https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json",
+    icon: "🗺️",
+  },
+  positron: {
+    label: "Light",
+    url: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
+    icon: "☀️",
+  },
+  dark: {
+    label: "Dark",
+    url: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+    icon: "🌙",
+  },
+  satellite: {
+    label: "Satellite",
+    url: "https://basemaps.cartocdn.com/gl/imagery-gl-style/style.json",
+    icon: "🛰️",
+  },
 } as const;
 
 export const PIN_COLORS = {

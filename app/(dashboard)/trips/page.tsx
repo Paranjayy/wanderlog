@@ -40,7 +40,7 @@ export default function TripsPage() {
 
     map.current = new maplibregl.Map({
       container: mapContainer.current,
-      style: MAP_STYLES.streets,
+      style: MAP_STYLES.voyager.url,
       center: [0, 20],
       zoom: 2,
     });
