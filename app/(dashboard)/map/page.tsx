@@ -91,8 +91,18 @@ export default function MapPage() {
         />
       </div>
 
+      {/* PlaceCard - Desktop: side panel, Mobile: bottom sheet */}
       {selectedPinId && (
-        <PlaceCard placeId={selectedPinId} onClose={() => setSelectedPinId(null)} />
+        <>
+          {/* Desktop */}
+          <div className="hidden md:block">
+            <PlaceCard placeId={selectedPinId} onClose={() => setSelectedPinId(null)} />
+          </div>
+          {/* Mobile */}
+          <div className="fixed inset-x-0 bottom-0 z-40 max-h-[70vh] rounded-t-2xl shadow-2xl md:hidden">
+            <PlaceCard placeId={selectedPinId} onClose={() => setSelectedPinId(null)} />
+          </div>
+        </>
       )}
 
       {currentUser && (

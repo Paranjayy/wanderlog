@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/use-auth";
 import { MapContainer } from "@/components/map/MapContainer";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { FollowButton } from "@/components/social/FollowButton";
+import { Achievements } from "@/components/social/Achievements";
 
 export default function ProfilePage() {
   const params = useParams<{ username: string }>();
@@ -82,6 +83,13 @@ export default function ProfilePage() {
             <FollowButton currentUserId={currentUser._id} targetUserId={user._id} />
           </div>
         )}
+      </div>
+
+      {/* Achievements */}
+      <div className="border-b bg-white p-6">
+        <div className="mx-auto max-w-4xl">
+          <Achievements userId={user._id} />
+        </div>
       </div>
 
       {/* User's map */}

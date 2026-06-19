@@ -56,7 +56,7 @@ export function PlaceCard({ placeId, onClose }: PlaceCardProps) {
 
   if (!place) {
     return (
-      <div className="h-full w-96 animate-pulse bg-gray-100 p-6">
+      <div className="h-full w-full animate-pulse bg-gray-100 p-6 md:w-96">
         <div className="h-4 w-32 rounded bg-gray-200" />
         <div className="mt-4 h-3 w-48 rounded bg-gray-200" />
       </div>
@@ -71,7 +71,7 @@ export function PlaceCard({ placeId, onClose }: PlaceCardProps) {
   };
 
   return (
-    <div className="h-full w-96 overflow-y-auto border-l bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900">
+    <div className="h-full w-full overflow-y-auto border-l bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900 md:w-96">
       {showEditModal && (
         <EditPinModal
           isOpen={showEditModal}
