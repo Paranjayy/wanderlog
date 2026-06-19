@@ -9,6 +9,7 @@ import { UserAvatar } from "./UserAvatar";
 import { PhotoGallery } from "./PhotoGallery";
 import { LikeButton } from "../social/LikeButton";
 import { Comments } from "../social/Comments";
+import { EditPinModal } from "../map/EditPinModal";
 
 interface PlaceCardProps {
   placeId: Id<"places">;
@@ -30,6 +31,8 @@ export function PlaceCard({ placeId, onClose }: PlaceCardProps) {
   const [storyTitle, setStoryTitle] = useState("");
   const [storyContent, setStoryContent] = useState("");
   const [isSubmittingStory, setIsSubmittingStory] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [shareTooltip, setShareTooltip] = useState(false);
 
   const handleCreateStory = async () => {
     if (!currentUser || !storyTitle.trim() || !storyContent.trim()) return;
@@ -68,24 +71,66 @@ export function PlaceCard({ placeId, onClose }: PlaceCardProps) {
   };
 
   return (
-    <div className="h-full w-96 overflow-y-auto border-l bg-white shadow-xl">
-      <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-white p-4">
+    <div className="h-full w-96 overflow-y-auto border-l bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900">
+      {showEditModal && (
+        <EditPinModal
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          place={{
+            _id: place._id,
+            name: place.name,
+            country: place.country,
+            continent: place.continent,
+            type: place.type,
+            rating: place.rating,
+            notes: place.notes,
+            tags: place.tags,
+          }}
+        />
+      )}
+      <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-white p-4 dark:border-gray-700 dark:bg-gray-900">
         <h2 className="text-lg font-bold">{place.name}</h2>
         <div className="flex items-center gap-1">
           {currentUser && place.userId === currentUser._id && (
-            <button
-              onClick={async () => {
-                if (confirm("Delete this place?")) {
-                  await deletePlace({ placeId: place._id });
-                  onClose();
-                }
-              }}
-              className="rounded-full p-1 text-red-500 hover:bg-red-50"
-            >
-              🗑
-            </button>
+            <>
+              <button
+                onClick={() => setShowEditModal(true)}
+                className="rounded-full p-1 text-blue-500 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30"
+                title="Edit place"
+              >
+                ✏️
+              </button>
+              <button
+                onClick={async () => {
+                  if (confirm("Delete this place?")) {
+                    await deletePlace({ placeId: place._id });
+                    onClose();
+                  }
+                }}
+                className="rounded-full p-1 text-red-500 hover:bg-red-50"
+              >
+                🗑
+              </button>
+            </>
           )}
-          <button onClick={onClose} className="rounded-full p-1 hover:bg-gray-100">✕</button>
+          <button
+            onClick={() => {
+              const url = `${window.location.origin}/place/${place._id}`;
+              navigator.clipboard.writeText(url);
+              setShareTooltip(true);
+              setTimeout(() => setShareTooltip(false), 2000);
+            }}
+            className="relative rounded-full p-1 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+            title="Copy share link"
+          >
+            🔗
+            {shareTooltip && (
+              <span className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white">
+                Copied!
+              </span>
+            )}
+          </button>
+          <button onClick={onClose} className="rounded-full p-1 hover:bg-gray-100 dark:hover:bg-gray-700">✕</button>
         </div>
       </div>
 

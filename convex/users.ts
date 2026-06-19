@@ -89,3 +89,15 @@ export const getByUsername = query({
       .unique();
   },
 });
+
+export const updateUser = mutation({
+  args: {
+    userId: v.id("users"),
+    bio: v.optional(v.string()),
+    isPublic: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    const { userId, ...updates } = args;
+    await ctx.db.patch(userId, updates);
+  },
+});

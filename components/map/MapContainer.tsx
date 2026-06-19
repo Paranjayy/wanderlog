@@ -15,12 +15,14 @@ interface MapContainerProps {
     name: string;
   }>;
   onPinClick?: (pinId: string) => void;
+  flyTo?: { lng: number; lat: number; zoom?: number } | null;
 }
 
 export function MapContainer({
   onMapClick,
   pins = [],
   onPinClick,
+  flyTo,
 }: MapContainerProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
@@ -50,6 +52,17 @@ export function MapContainer({
       map.current?.remove();
     };
   }, []);
+
+  // Fly to location when flyTo changes
+  useEffect(() => {
+    if (flyTo && map.current) {
+      map.current.flyTo({
+        center: [flyTo.lng, flyTo.lat],
+        zoom: flyTo.zoom ?? 12,
+        duration: 2000,
+      });
+    }
+  }, [flyTo]);
 
   // Update markers when pins change
   useEffect(() => {
