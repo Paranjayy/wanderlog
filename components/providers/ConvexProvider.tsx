@@ -6,15 +6,11 @@ import { ConvexReactClient, ConvexProvider } from "convex/react";
 const rawConvexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
 const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
-// Skip Convex if URL is localhost (won't work on Vercel)
-const convexUrl = rawConvexUrl && !rawConvexUrl.includes("localhost") ? rawConvexUrl : null;
-const convex = convexUrl ? new ConvexReactClient(convexUrl) : null;
+// Use localhost URL for build-time (won't connect but satisfies ConvexProvider)
+const convexUrl = rawConvexUrl || "https://placeholder.convex.cloud";
+const convex = new ConvexReactClient(convexUrl);
 
 function InnerProviders({ children }: { children: ReactNode }) {
-  if (!convex) {
-    return <>{children}</>;
-  }
-
   // If Clerk is available, use full auth stack
   if (clerkKey) {
     const { ClerkProvider, useAuth } = require("@clerk/nextjs");
@@ -29,7 +25,7 @@ function InnerProviders({ children }: { children: ReactNode }) {
     );
   }
 
-  // No Clerk — just Convex (no auth)
+  // No Clerk — just Convex
   return <ConvexProvider client={convex}>{children}</ConvexProvider>;
 }
 
