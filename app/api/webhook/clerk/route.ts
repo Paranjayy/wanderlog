@@ -3,14 +3,20 @@ import { WebhookEvent } from "@clerk/backend";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../../../../convex/_generated/api";
 
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+function getConvexClient() {
+  const url = process.env.NEXT_PUBLIC_CONVEX_URL;
+  if (!url) throw new Error("NEXT_PUBLIC_CONVEX_URL not set");
+  return new ConvexHttpClient(url);
+}
 
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
 
   if (!WEBHOOK_SECRET) {
-    throw new Error("Missing CLERK_WEBHOOK_SECRET");
+    return new Response("Missing CLERK_WEBHOOK_SECRET", { status: 500 });
   }
+
+  const convex = getConvexClient();
 
   const svix_id = req.headers.get("svix-id")!;
   const svix_timestamp = req.headers.get("svix-timestamp")!;
