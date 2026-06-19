@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useAuth } from "@/lib/use-auth";
@@ -9,6 +9,19 @@ import { AddPinModal } from "@/components/map/AddPinModal";
 import { SearchBar } from "@/components/map/SearchBar";
 import { PlaceCard } from "@/components/ui/PlaceCard";
 import { Id } from "../../../convex/_generated/dataModel";
+
+const getContinent = (code: string): string => {
+  const map: Record<string, string> = {
+    af: "Africa",
+    as: "Asia",
+    eu: "Europe",
+    na: "North America",
+    sa: "South America",
+    oc: "Oceania",
+    an: "Antarctica",
+  };
+  return map[code?.slice(0, 2)] || "";
+};
 
 export default function MapPage() {
   const { userId } = useAuth();
@@ -23,6 +36,41 @@ export default function MapPage() {
   const [newPinCoords, setNewPinCoords] = useState<{ lng: number; lat: number } | null>(null);
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [flyToCoords, setFlyToCoords] = useState<{ lng: number; lat: number } | null>(null);
+
+  // Reverse geocoding state
+  const [geoName, setGeoName] = useState("");
+  const [geoCountry, setGeoCountry] = useState("");
+  const [geoContinent, setGeoContinent] = useState("");
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+
+  const reverseGeocode = useCallback(async (lat: number, lng: number) => {
+    setIsLoadingLocation(true);
+    setGeoName("");
+    setGeoCountry("");
+    setGeoContinent("");
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`,
+        { headers: { "User-Agent": "Wanderlog/1.0" } }
+      );
+      const data = await res.json();
+      setGeoName(
+        data.address?.city ||
+          data.address?.town ||
+          data.address?.village ||
+          data.display_name?.split(",")[0] ||
+          ""
+      );
+      setGeoCountry(data.address?.country || "");
+      setGeoContinent(getContinent(data.address?.country_code || ""));
+    } catch {
+      setGeoName("");
+      setGeoCountry("");
+      setGeoContinent("");
+    } finally {
+      setIsLoadingLocation(false);
+    }
+  }, []);
 
   const allTags = allPlaces
     ? [...new Set(allPlaces.flatMap((p) => p.tags))].sort()
@@ -86,6 +134,7 @@ export default function MapPage() {
           onMapClick={(lng, lat) => {
             setNewPinCoords({ lng, lat });
             setShowAddModal(true);
+            reverseGeocode(lat, lng);
           }}
           flyTo={flyToCoords}
         />
@@ -114,6 +163,10 @@ export default function MapPage() {
           }}
           coordinates={newPinCoords || { lng: 0, lat: 0 }}
           userId={currentUser._id}
+          initialName={geoName}
+          initialCountry={geoCountry}
+          initialContinent={geoContinent}
+          isLoadingLocation={isLoadingLocation}
         />
       )}
     </div>

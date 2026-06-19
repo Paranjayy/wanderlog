@@ -39,8 +39,14 @@ export function Navbar() {
             <Link href="/trips" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
               Trips
             </Link>
+            <Link href="/journal" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
+              Journal
+            </Link>
             <Link href="/stats" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
               Stats
+            </Link>
+            <Link href="/world" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
+              World
             </Link>
             <Link href="/discover" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
               Discover
@@ -101,8 +107,14 @@ export function Navbar() {
               <Link href="/trips" onClick={() => setMobileOpen(false)} className="text-lg text-gray-700 hover:text-emerald-600">
                 Trips
               </Link>
+              <Link href="/journal" onClick={() => setMobileOpen(false)} className="text-lg text-gray-700 hover:text-emerald-600">
+                Journal
+              </Link>
               <Link href="/stats" onClick={() => setMobileOpen(false)} className="text-lg text-gray-700 hover:text-emerald-600">
                 Stats
+              </Link>
+              <Link href="/world" onClick={() => setMobileOpen(false)} className="text-lg text-gray-700 hover:text-emerald-600">
+                World
               </Link>
               <Link href="/discover" onClick={() => setMobileOpen(false)} className="text-lg text-gray-700 hover:text-emerald-600">
                 Discover
